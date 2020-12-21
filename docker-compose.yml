@@ -344,6 +344,9 @@ services:
         # Data persistency
         # sudo mkdir -p /srv/docker/influxdb/data
         - influxdb:/var/lib/influxdb
+      networks:
+        - frontend
+        - backend
 
     telegraf:
       image: telegraf:latest
@@ -352,6 +355,9 @@ services:
         - influxdb
       volumes:
         - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      networks:
+        - frontend
+        - backend
 
     grafana:
       image: grafana/grafana:latest
@@ -367,4 +373,7 @@ services:
         # Data persistency
         # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
         - grafana:/var/lib/grafana
+      networks:
+        - frontend
+        - backend
 
