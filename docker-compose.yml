@@ -285,6 +285,7 @@ services:
         - ${DATA_PATH_HOST}/mongo:/data/db
         - ${DATA_PATH_HOST}/mongo_config:/data/configdb
       networks:
+        - frontend
         - backend
 
 ### ElasticSearch ########################################
@@ -329,6 +330,7 @@ services:
       expose:
         - 2375
       networks:
+        - frontend
         - backend
 
     influxdb:
