@@ -13,10 +13,9 @@ volumes:
     driver: ${VOLUMES_DRIVER}
   docker-in-docker:
     driver: ${VOLUMES_DRIVER}
-  influxdb:
-    driver: ${VOLUMES_DRIVER}
-  grafana:
-    driver: ${VOLUMES_DRIVER}
+  grafana_data: { }
+  influxdb: { }
+  mongodb: { }
 
 services:
 
@@ -228,6 +227,8 @@ services:
           - http_proxy
           - https_proxy
           - no_proxy
+      container_name: php-fpm
+      hostname: php-fpm
       volumes:
         - ./php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
@@ -261,6 +262,8 @@ services:
           - http_proxy
           - https_proxy
           - no_proxy
+      container_name: nginx
+      hostname: nginx
       volumes:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
         - ${NGINX_HOST_LOG_PATH}:/var/log/nginx
@@ -279,8 +282,10 @@ services:
 ### MongoDB ##############################################
     mongo:
       build: ./mongo
+      container_name: mongo
+      hostname: mongo
       ports:
-        - "${MONGODB_PORT}:27017"
+        - 27017:27017
       volumes:
         - ${DATA_PATH_HOST}/mongo:/data/db
         - ${DATA_PATH_HOST}/mongo_config:/data/configdb
@@ -294,6 +299,8 @@ services:
         context: ./elasticsearch
         args:
           - ELK_VERSION=${ELK_VERSION}
+      container_name: elasticsearch
+      hostname: elasticsearch
       volumes:
         - elasticsearch:/usr/share/elasticsearch/data
       environment:
@@ -321,6 +328,8 @@ services:
 ### Docker-in-Docker ################################################
     docker-in-docker:
       image: docker:19.03-dind
+      container_name: docker-in-docker
+      hostname: docker-in-docker
       environment:
         DOCKER_TLS_SAN: DNS:docker-in-docker
       privileged: true
@@ -334,47 +343,53 @@ services:
         - backend
 
     influxdb:
-      image: influxdb:latest
+      image: influxdb:1.8-alpine
       container_name: influxdb
+      hostname: influxdb
+      env_file: configuration.env
       ports:
-        - "8083:8083"
-        - "8086:8086"
-        - "8090:8090"
-      env_file:
-        - 'env.influxdb'
+        - 8086:8086
       volumes:
-        # Data persistency
-        # sudo mkdir -p /srv/docker/influxdb/data
+        - ./:/imports
         - influxdb:/var/lib/influxdb
       networks:
         - frontend
         - backend
 
     telegraf:
-      image: telegraf:latest
+      image: telegraf:1.15-alpine
       container_name: telegraf
+      hostname: telegraf
+      volumes:
+        - ./telegraf/etc/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      depends_on:
+        - influxdb
       links:
         - influxdb
-      volumes:
-        - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+        - mongo
+        - elasticsearch
+        - nginx
+      ports:
+        - 8125:8125
       networks:
         - frontend
         - backend
 
     grafana:
-      image: grafana/grafana:latest
+      image: grafana/grafana:7.2.1
       container_name: grafana
-      ports:
-        - "9999:3000"
-      env_file:
-        - 'env.grafana'
-      user: "0"
+      hostname: grafana
+      depends_on:
+        - influxdb
+      env_file: configuration.env
       links:
         - influxdb
+      ports:
+        - 9999:3000
       volumes:
-        # Data persistency
-        # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
-        - grafana:/var/lib/grafana
+        - grafana_data:/var/lib/grafana
+        - ./grafana/provisioning/:/etc/grafana/provisioning/
+        - ./grafana/dashboards/:/var/lib/grafana/dashboards/
       networks:
         - frontend
         - backend
