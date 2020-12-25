@@ -1,6 +1,7 @@
 #!/bin/bash
 
 docker-compose exec influxdb influx -execute 'CREATE DATABASE influx'
+docker-compose exec influxdb influx -execute 'SHOW DATABASES'
 
 sudo mkdir -p /srv/docker/grafana/data
 docker-compose up -d
