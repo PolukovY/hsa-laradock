@@ -372,26 +372,41 @@ services:
         - nginx
       ports:
         - 8125:8125
+        - 8888:8888
       networks:
         - frontend
         - backend
 
     grafana:
-      image: grafana/grafana:7.2.1
+      image: grafana/grafana
       container_name: grafana
       hostname: grafana
       depends_on:
         - influxdb
-      env_file: configuration.env
+      env_file:
+       - 'configuration.env'
+       - 'env.grafana'
       links:
         - influxdb
       ports:
         - 9999:3000
       volumes:
-        - grafana_data:/var/lib/grafana
-        - ./grafana/provisioning/:/etc/grafana/provisioning/
-        - ./grafana/dashboards/:/var/lib/grafana/dashboards/
+        - ./grafana:/var/lib/grafana
+#        - ./grafana/provisioning/:/etc/grafana/provisioning/
+#        - ./grafana/dashboards/:/var/lib/grafana/dashboards/
       networks:
         - frontend
         - backend
+
+    transactions:
+      image: springio/transactions
+      container_name: transactions
+      hostname: transactions
+      ports:
+        - 8082:8082
+        - 8083:8083
+      networks:
+        - frontend
+        - backend
+
 
