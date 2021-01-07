@@ -233,8 +233,8 @@ services:
         - ./php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
         - docker-in-docker:/certs/client
-      expose:
-        - "9000"
+      ports:
+        - "9000:9000"
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
       environment:
