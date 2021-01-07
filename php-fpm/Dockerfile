@@ -201,6 +201,8 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
 
 # Copy xdebug configuration for remote debugging
 COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
+
 
 RUN sed -i "s/xdebug.remote_autostart=0/xdebug.remote_autostart=1/" /usr/local/etc/php/conf.d/xdebug.ini && \
     sed -i "s/xdebug.remote_enable=0/xdebug.remote_enable=1/" /usr/local/etc/php/conf.d/xdebug.ini && \
@@ -328,7 +330,7 @@ RUN if [ ${INSTALL_XHPROF} = true ]; then \
     # Install the php xhprof extension
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = 7 ]; then \
       curl -L -o /tmp/xhprof.tar.gz "https://github.com/tideways/php-xhprof-extension/archive/v5.0.1.tar.gz"; \
-    else \ 
+    else \
       curl -L -o /tmp/xhprof.tar.gz "https://codeload.github.com/phacility/xhprof/tar.gz/master"; \
     fi \
     && mkdir -p xhprof \
@@ -344,7 +346,7 @@ RUN if [ ${INSTALL_XHPROF} = true ]; then \
     && rm /tmp/xhprof.tar.gz \
 ;fi
 
-COPY ./xhprof.ini /usr/local/etc/php/conf.d
+COPY xhprof.ini /usr/local/etc/php/conf.d
 
 RUN if [ ${INSTALL_XHPROF} = false ]; then \
     rm /usr/local/etc/php/conf.d/xhprof.ini \
@@ -557,7 +559,7 @@ RUN if [ ${INSTALL_OPCACHE} = true ]; then \
 ;fi
 
 # Copy opcache configration
-COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 ###########################################################################
 # Mysqli Modifications:
@@ -720,7 +722,7 @@ ARG LARADOCK_PHALCON_VERSION
 ENV LARADOCK_PHALCON_VERSION ${LARADOCK_PHALCON_VERSION}
 
 # Copy phalcon configration
-COPY ./phalcon.ini /usr/local/etc/php/conf.d/phalcon.ini.disable
+COPY phalcon.ini /usr/local/etc/php/conf.d/phalcon.ini.disable
 
 RUN if [ $INSTALL_PHALCON = true ]; then \
     apt-get update && apt-get install -y unzip libpcre3-dev gcc make re2c git automake autoconf\
@@ -898,7 +900,7 @@ RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
     libx11-dev \
     libjpeg62 \
     libxtst6 \
-    fontconfig \ 
+    fontconfig \
     libjpeg62-turbo \
     xfonts-base \
     xfonts-75dpi \
@@ -991,8 +993,8 @@ RUN set -xe; php -v | head -n 1 | grep -q "PHP ${LARADOCK_PHP_VERSION}."
 #--------------------------------------------------------------------------
 #
 
-COPY ./laravel.ini /usr/local/etc/php/conf.d
-COPY ./xlaravel.pool.conf /usr/local/etc/php-fpm.d/
+COPY laravel.ini /usr/local/etc/php/conf.d
+COPY xlaravel.pool.conf /usr/local/etc/php-fpm.d/
 
 USER root
 

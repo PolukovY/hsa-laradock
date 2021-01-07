@@ -357,7 +357,7 @@ services:
         - backend
 
     telegraf:
-      image: telegraf:1.15-alpine
+      image: telegraf:latest
       container_name: telegraf
       hostname: telegraf
       volumes:
