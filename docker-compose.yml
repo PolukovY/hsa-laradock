@@ -392,21 +392,21 @@ services:
         - 9999:3000
       volumes:
         - ./grafana:/var/lib/grafana
-#        - ./grafana/provisioning/:/etc/grafana/provisioning/
-#        - ./grafana/dashboards/:/var/lib/grafana/dashboards/
+        - ./grafana/provisioning/:/etc/grafana/provisioning/
+        - ./grafana/dashboards/:/var/lib/grafana/dashboards/
       networks:
         - frontend
         - backend
 
-    transactions:
-      image: springio/transactions
-      container_name: transactions
-      hostname: transactions
-      ports:
-        - 8082:8082
-        - 8083:8083
-      networks:
-        - frontend
-        - backend
+#    transactions:
+#      image: transactions
+#      container_name: transactions
+#      hostname: transactions
+#      ports:
+#        - 8082:8082
+#        - 8083:8083
+#      networks:
+#        - frontend
+#        - backend
 
 
